@@ -19,6 +19,7 @@ class App extends Component {
     return (
       <Card
         title="It is over."
+        containerStyle={{ boderWidth: 0 }}
       >
         <Text style={{ marginBottom: 10 }}>
           There is no more lovely girls to like.
