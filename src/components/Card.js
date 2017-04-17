@@ -2,7 +2,7 @@ import React from 'react';
 import { Text } from 'react-native';
 import { Card, Button } from 'react-native-elements';
 
-const CardComponent = ({ item }) => (
+const CardComponent = ({ item, children }) => (
   <Card
     title={item.text}
     image={{ uri: item.uri }}

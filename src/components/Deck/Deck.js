@@ -9,18 +9,28 @@ import {
   SCREEN_WIDTH,
   SWIPE_THRESOLD,
   SWIPE_OUT_DURATION
-} from '../constants/constants';
+} from '../../constants/constants';
 
+import styles from './styles';
 
 class Deck extends Component {
+  static defaultProps = {
+    onSwipeRight: () => {
+      console.log('default on swipe right');
+    },
+    onSwipeLeft: () => {
+      console.log('default on swipe left')
+    }
+  }
 
   constructor(props) {
     super(props);
     const position = new Animated.ValueXY();
     const panResponder = this.createPanResponder(position);
+
+    this.position = position;
     this.state = {
       panResponder,
-      position,
       index: 0
     };
   }
@@ -45,8 +55,20 @@ class Deck extends Component {
     });
   }
 
+  getCardStyle() {
+    const rotatationRange = SCREEN_WIDTH * 1.5;
+    const rotate = this.position.x.interpolate({
+      inputRange: [-rotatationRange, 0, rotatationRange],
+      outputRange: ['-90deg', '0deg', '90deg'],
+    });
+    return {
+      ...this.position.getLayout(),
+      transform: [{ rotate }]
+    }
+  }
+
   forceSwipe(direction) {
-    Animated.timing(this.state.position, {
+    Animated.timing(this.position, {
       toValue: { x: direction, y: 0 },
       duration: SWIPE_OUT_DURATION,
     }).start(() => this.onSwipeComplete(direction));
@@ -54,48 +76,53 @@ class Deck extends Component {
 
   onSwipeComplete(direction) {
     const { onSwipeLeft, onSwipeRight, data } = this.props;
-    const item = data[this.state.index]
+    const item = data[this.state.index];
     if (direction > 0) { // right
       onSwipeRight(item);
     } else { // left
       onSwipeLeft(item);
     }
-  }
 
-  getCardStyle() {
-    const { position } = this.state;
-    const rotatationRange = SCREEN_WIDTH * 1.5;
-    const rotate = position.x.interpolate({
-      inputRange: [-rotatationRange, 0, rotatationRange],
-      outputRange: ['-90deg', '0deg', '90deg'],
-    });
-    return {
-      ...position.getLayout(),
-      transform: [{ rotate }]
-    }
+    this.position.setValue({ x: 0, y: 0 });
+    this.setState({ index: this.state.index + 1 });
   }
 
   resetPosition() {
-    Animated.spring(this.state.position, {
+    Animated.spring(this.position, {
       toValue: { x: 0, y: 0 }
     }).start();
   }
 
   renderCards() {
-    return this.props.data.map((item, index) => {
-      if (index === 0) {
+    const currentCardIndex = this.state.index;
+    const { data, renderCard, renderNoMoreCards } = this.props;
+
+    if (currentCardIndex === data.length) {
+      return renderNoMoreCards();
+    }
+    return data.map((item, index) => {
+      if (index < currentCardIndex) {
+        return null;
+      }
+      if (index === currentCardIndex) {
         return (
           <Animated.View
             key={item.id}
-            style={this.getCardStyle()}
+            style={[this.getCardStyle(), styles.cardStyle]}
             {...this.state.panResponder.panHandlers}
           >
-            {this.props.renderCard(item)}
+            {renderCard(item)}
           </Animated.View>
         );
       }
-      return this.props.renderCard(item);
-    });
+      return (
+        <Animated.View
+          style={styles.cardStyle}
+          key={item.id}
+        >
+          {this.props.renderCard(item)}
+        </Animated.View>);
+    }).reverse();
   }
 
   render() {
