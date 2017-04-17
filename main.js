@@ -1,37 +1,14 @@
 import Expo from 'expo';
-import React from 'react';
-import { StyleSheet, Text, View, ScrollView } from 'react-native';
+import React, { Component } from 'react';
 
-import DATA from './src/data/data';
-import Deck from './src/components/Deck';
-import CardComponent from './src/components/Card';
+import App from './src/components/App';
 
-class App extends React.Component {
-
-  renderCard(item) {
-    return (<CardComponent
-      key={item.id}
-      item={item}
-    />);
-  }
-
+class Main extends Component {
   render() {
     return (
-      <ScrollView style={styles.container}>
-        <Deck
-          data={DATA}
-          renderCard={this.renderCard}
-        />
-      </ScrollView>
+      <App />
     );
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-});
-
-Expo.registerRootComponent(App);
+Expo.registerRootComponent(Main);

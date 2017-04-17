@@ -6,6 +6,7 @@ const CardComponent = ({ item }) => (
   <Card
     title={item.text}
     image={{ uri: item.uri }}
+    imageStyle={{ height: 300 }}
   >
     <Text
       style={{ marginBottom: 10 }}
